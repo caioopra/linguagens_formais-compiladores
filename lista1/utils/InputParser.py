@@ -24,12 +24,12 @@ def clearString(rawString: str) -> list[str]:
 
 
 def createTransitions(transitions: list[str]) -> list[tuple]:
-    buffer = []
-    for transition in transitions:
-        init, symb, final = transition.split(",")
-        buffer.append(Transition(init, symb, final))
+   # buffer = []
+   # for transition in transitions:
+   #     init, symb, final = transition.split(",")
+   #     buffer.append(Transition(init, symb, final))
 
-    return buffer
+   # return buffer
 
 def getAllStates(transitions: list[Transition]) -> list[str]:
     states = set()

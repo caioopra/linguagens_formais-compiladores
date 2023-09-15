@@ -20,27 +20,28 @@ class Automata:
         self.transitions = transitions
         self.all_states = all_states
         
-    def convertToDFA(self):
-        epsilon_transitions = [] 
-        determ_transitions = {}
+        self._has_epsilon = True if any([transition.symbol == "&" for transition in self.transitions]) else False 
 
+    def printItself(self):
+        print("[AUTOMATA] Number of states: ", self.states_number)
+        print("[AUTOMATA] Initial state: ", self.initial_state)
+        print("[AUTOMATA] Final states: ", self.final_states)
+        print("[AUTOMATA] Alphabet: ", self.alphabet)
+        print("[AUTOMATA] Transitions: ")
         for transition in self.transitions:
-            if transition.symbol == "&":
-                epsilon_transitions.append(transition)
+            print("[AUTOMATA] ", transition)
+        print("[AUTOMATA] All states: ", self.all_states)
 
-        print("Epsilon: ", self._create_epsilon_closure(epsilon_transitions)) 
+    def convertToDFA(self):
+        if self._has_epsilon:
+            closure = self._create_epsilon_closure()
+        else:
+            transitions = self._create_transitions()
     
-    def _create_epsilon_closure(self, epsilon_transitions) -> set:
-        closure = set(self.initial_state)
-        stack = list(self.all_states)
+    def _create_epsilon_closure(self) -> set:
+        ...
 
-        while stack:
-            state = stack.pop()
-
-            if state in epsilon_transitions:
-                for epsilon_target in epsilon_transitions[state.initial_state]:
-                    if epsilon_target not in closure:
-                        closure.add(epsilon_target)
-                        stack.append(epsilon_target)
-
-        return closure
+    def _create_transitions(self) -> list:
+        transitions = {}
+        for transition in self.transitions:
+            ...
