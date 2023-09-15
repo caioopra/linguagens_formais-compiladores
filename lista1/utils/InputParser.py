@@ -10,8 +10,9 @@ def parseInput(inputStr: str):
     final_states = clearString(final_states)
     alphabet = clearString(alphabet)
     transitions = createTransitions(transitions)
+    all_states = getAllStates(transitions)
 
-    return states_number, initial_state, final_states, alphabet, transitions
+    return states_number, initial_state, final_states, alphabet, transitions, all_states
 
 
 def clearString(rawString: str) -> list[str]:
@@ -29,3 +30,12 @@ def createTransitions(transitions: list[str]) -> list[tuple]:
         buffer.append(Transition(init, symb, final))
 
     return buffer
+
+def getAllStates(transitions: list[Transition]) -> list[str]:
+    states = set()
+    for transition in transitions:
+        states.add(transition.initial_state)
+        states.add(transition.target_state)
+
+    return list(states)
+

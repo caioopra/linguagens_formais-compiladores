@@ -1,1 +1,2 @@
-
+def create_epsilon_closure(transitions: list):
+    ...
