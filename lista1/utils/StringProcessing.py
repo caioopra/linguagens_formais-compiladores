@@ -1,5 +1,5 @@
 from Automata.Transition import Transition
-
+from Automata.Automata import Automata
 
 def parseInput(inputStr: str):
     states_number, initial_state, final_states, alphabet, *transitions = inputStr.split(
@@ -70,3 +70,23 @@ def _getAllStates(transitions: list[Transition]) -> list[str]:
         states.add(final)
 
     return states
+
+
+def dfaToString(automata: Automata) -> str:
+    result = ""
+    
+    result += f"{automata.states_number};"
+    
+    # initial state
+    result += "{"
+    for s in automata.initial_state:
+        result += s
+    result += "};"
+    
+    # final states
+    result += "{"
+    result += ",".join(["".join(final) for final in automata.final_states])
+    result += "};"
+    
+    print(result)
+    
