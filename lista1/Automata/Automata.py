@@ -165,6 +165,8 @@ class Automata:
                     if s in self.final_states:
                         final_states.add(str(target))
 
+        transitions = sorted(transitions, key=lambda x: x.initial_state)
+
         states = sorted(list(states))
         new_states = sorted([list(filter(lambda x: x.isalpha(), s)) for s in states])
 
