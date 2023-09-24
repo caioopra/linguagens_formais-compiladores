@@ -61,7 +61,7 @@ class Automata:
             state = states_queue.pop(0)
 
             for symbol in self.alphabet:
-                target_states = self._get_targets_with_state_sybmol(
+                target_states = self.get_targets_with_state_symbol(
                     state=state, symbol=symbol
                 )
                 transitions_closure = set()
@@ -120,7 +120,7 @@ class Automata:
 
         self._eps_closure = closure
 
-    def _get_targets_with_state_sybmol(self, state: str, symbol: str):
+    def get_targets_with_state_symbol(self, state: str, symbol: str):
         states = set()
         for s in state:
             for transition in self.transitions:
@@ -183,3 +183,6 @@ class Automata:
             transitions=transitions,
             all_states=new_states,
         )
+
+    def setTransitions(self, transitions: list) -> None:
+        self.transitions = transitions

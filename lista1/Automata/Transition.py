@@ -38,3 +38,4 @@ class Transition:
             return self.initial_state
 
         return [self.initial_state]
+
