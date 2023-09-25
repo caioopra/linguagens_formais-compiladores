@@ -25,5 +25,5 @@ automata = Automata(
 )
 
 min_automata = minimize(automata)
-dfa_as_string = dfaToString(min_automata)
+dfa_as_string = dfaToString(min_automata, minimizing=True)
 print(dfa_as_string)

@@ -73,26 +73,36 @@ def _getAllStates(transitions: list[Transition]) -> list[str]:
     return states
 
 
-def dfaToString(automata: Automata) -> str:
+def dfaToString(automata: Automata, minimizing: bool = False) -> str:
     result = ""
 
     result += f"{automata.states_number};"
 
     # initial state
-    result += "{"
-    for s in automata.initial_state:
-        result += s
-    result += "};"
+    if not minimizing:
+        result += "{"
+        for s in automata.initial_state:
+            result += s
+        result += "};"
+    else:
+        result += automata.initial_state[0] + ";"
 
     # final states
-    result += "{"
     finals = ["".join(final) for final in automata.final_states]
-    for f in finals:
+    if not minimizing:
         result += "{"
-        result += f
-        result += "},"
-    result = result.rstrip(result[-1])
-    result += "};"
+        for f in finals:
+            result += "{"
+            result += f
+            result += "},"
+        result = result.rstrip(result[-1])
+        result += "};"
+    else:
+        result += "{"
+        for f in finals:
+            result += f"{f},"
+        result = result.rstrip(result[-1])
+        result += "};"
 
     # alphabet
     result += "{"
@@ -101,17 +111,23 @@ def dfaToString(automata: Automata) -> str:
 
     for transition in automata.transitions:
         if transition.target_state != []:
-            init = "{"
-            init += "".join(transition.initial_state)
-            init += "}"
-            symb = transition.symbol
-            target = "{"
-            target += "".join(transition.target_state)
-            target += "}"
+            if not minimizing:
+                init = "{"
+                init += "".join(transition.initial_state)
+                init += "}"
+                symb = transition.symbol
+                target = "{"
+                target += "".join(transition.target_state)
+                target += "}"
 
-            result += f"{init},"
-            result += f"{symb},"
-            result += target + ";"
+                result += f"{init},"
+                result += f"{symb},"
+                result += target + ";"
+            else:
+                result += transition.initial_state[0] + ","
+                result += transition.symbol + ","
+                result += transition.target_state + ";"
+
     result = result.rstrip(result[-1])
 
     return result

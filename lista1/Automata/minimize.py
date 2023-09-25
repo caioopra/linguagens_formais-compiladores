@@ -5,71 +5,78 @@ from Automata.Automata import Automata
 
 
 def minimize(automata: Automata) -> Automata:
-    _removeUnrecheable(automata)
-    teste = _removeDead(automata)
-    automata.setTransitions(teste)
+    min_states, min_final = _removeUnrecheable(automata)
+
+    automata.all_states = min_states
+    automata.final_states = min_final
+
+    states, final = _removeDead(automata)
+    automata.all_states = states
+    automata.final_states = final
+
     equivalent_classes = _create_equiv_classes(automata)
 
     min_automata = _create_min_automata(automata, equivalent_classes)
-    
-    return min_automata 
 
-def _removeUnrecheable(automata: Automata) -> None:
-    visited = set()
+    return min_automata
+
+
+def _removeUnrecheable(automata: Automata):
+    min_transitions = set()
     queue = [automata.initial_state]
+    visited = []
 
-    while len(queue):
-        current = queue.pop(0)
-        visited.add(current[0])
+    while len(queue) > 0:
+        current = queue.pop(0)[0]
+        visited.append(current)
 
-        for symbol in automata.alphabet:
-            targets = automata.get_targets_with_state_symbol(
-                state=current, symbol=symbol
-            )
-            if not targets[0] in visited:
-                queue.append(targets[0])
+        reachable = set()
+        transitions = set()
 
-    for state in automata.all_states:
-        if state not in visited:
-            automata.all_states.remove(state)
-            
+        for transition in automata.transitions:
+            if transition.initial_state == current:
+                reachable.add(transition.target_state[0])
+                transitions.add(transition)
+
+        for current in reachable:
+            if current not in queue and current not in visited:
+                queue.append(current)
+
+        min_transitions |= transitions
+
+    min_states = sorted(list(set(visited) & set(automata.all_states)))
+    min_final = sorted(list(set(visited) & set(automata.final_states)))
+
+    return (min_states, min_final)
 
 
 def _removeDead(automata: Automata) -> Automata:
-    queue = []
-    visited = set()
-    for f in automata.final_states:
-        queue.append(f)
+    queue = list(automata.final_states)
+    visited = []
 
-    while len(queue):
-        state = queue.pop(0)
-        visited.add(state)
+    min_transitions = set(automata.transitions)
 
-        for transition in automata.transitions:
-            for symbol in automata.alphabet:
-                if transition.symbol == symbol and transition.target_state[0] == state:
-                    if transition.initial_state not in visited:
-                        queue.append(transition.initial_state)
+    while len(queue) > 0:
+        state = queue.pop(0)[0]
+        visited.append(state)
 
-    dead_states = []
-    for s in automata.all_states:
-        if s not in visited:
-            dead_states.append(s)
-            automata.all_states.remove(s)
+        valid = set()
+        transitions = set()
+        for t in automata.transitions:
+            if t.target_state[0] == state:
+                valid.add(t.initial_state)
+                transitions.add(t)
 
-    if dead_states:
-        new_transitions = []
-        for dead in dead_states:
-            for transition in automata.transitions:
-                if (
-                    dead != transition.initial_state
-                    and dead != transition.target_state[0]
-                ):
-                    new_transitions.append(transition)
+        for state in valid:
+            if not state in visited and not state in queue:
+                queue.append(state)
 
-        return new_transitions
+        min_transitions |= transitions
 
-    return automata.transitions
+    min_states = sorted(list(set(visited) & set(automata.all_states)))
+    min_final = sorted(list(set(visited) & set(automata.final_states)))
+
+    return (min_states, min_final)
 
 
 def _create_equiv_classes(automata: Automata):
@@ -102,7 +109,7 @@ def _create_equiv_classes(automata: Automata):
                     target = automata.get_targets_with_state_symbol(
                         state=[state], symbol=symbol
                     )
-                    
+
                     if target:
                         target = target[0]
                     ins = False
@@ -139,15 +146,16 @@ def _create_equiv_classes(automata: Automata):
 
         last_equiv_classes = current_equiv_classes
 
-    return current_equiv_classes 
+    return current_equiv_classes
+
 
 def _create_min_automata(automata: Automata, equiv_classes: set) -> Automata:
     name_transpose = dict()
-    
+
     equiv_classes = list(equiv_classes)
     for eq_class in [sorted(list(e)) for e in equiv_classes]:
         if len(eq_class) > 1:
-            name_transpose[str(eq_class)] = eq_class[0] 
+            name_transpose[str(eq_class)] = eq_class[0]
         else:
             name_transpose[eq_class[0]] = eq_class[0]
 
@@ -157,8 +165,8 @@ def _create_min_automata(automata: Automata, equiv_classes: set) -> Automata:
         src = _get_transpose_name(name_transpose, transition.initial_state)
         symbol = transition.symbol
         target = _get_transpose_name(name_transpose, transition.target_state)
-        
-        if [src, symbol, target] not in inserted and src != "0":
+
+        if [src, symbol, target] not in inserted and src != "0" and target is not None:
             new_transitions.append(Transition(src, symbol, target))
             inserted.append([src, symbol, target])
 
@@ -171,8 +179,7 @@ def _create_min_automata(automata: Automata, equiv_classes: set) -> Automata:
     for t in new_states:
         if t in automata.final_states:
             finals.add(t)
-    finals = list(finals)
-
+    finals = sorted(list(finals))
 
     new_automata = Automata(
         states_number=len(new_states),
@@ -180,13 +187,13 @@ def _create_min_automata(automata: Automata, equiv_classes: set) -> Automata:
         final_states=finals,
         alphabet=automata.alphabet,
         transitions=new_transitions,
-        all_states=new_states
-    ) 
+        all_states=new_states,
+    )
 
     return new_automata
+
 
 def _get_transpose_name(transpose_dict: dict, name: str):
     for k in transpose_dict.keys():
         if name[0] in k:
             return transpose_dict[k]
-
